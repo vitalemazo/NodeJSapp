@@ -6,7 +6,7 @@ metadata:
   labels:
     app: nodejs
 spec:
-  type: LoadBalancer
+  type: clusterIP
   ports:
     - port: 80
       targetPort: 1337
