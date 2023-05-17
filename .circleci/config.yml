@@ -17,6 +17,12 @@ jobs:
           name: Pull Updated code from repo
           command: git pull origin $CIRCLE_BRANCH
       - run:
+          name: Build and Push Docker Image
+          command: |
+            docker build -t $DOCKER_LOGIN/$APP_NAME:$CIRCLE_SHA1 .
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            docker push $DOCKER_LOGIN/$APP_NAME:$CIRCLE_SHA1
+      - run:
           name: Deploy to Kubernetes
           command: |
             kubectl config set-cluster local-cluster --server=https://192.168.56.101:6443/
