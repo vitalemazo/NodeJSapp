@@ -16,10 +16,11 @@ jobs:
       - run:
           name: Pull Updated code from repo
           command: git pull origin $CIRCLE_BRANCH
-      - kubernetes/install-kubectl
       - run:
           name: Deploy to Kubernetes
           command: |
+            kubectl config set-cluster local-cluster --server=https://192.168.56.101:6443/
+            kubectl config use-context local-cluster
             kubectl apply -f manifests/$APP_NAME.yaml --namespace=$NAMESPACE
 
   bump-docker-tag-kustomize:
@@ -49,7 +50,7 @@ jobs:
           command: |
             git config user.email "$GITHUB_EMAIL"
             git config user.name "CircleCI User"
-            git checkout $CIRCLE_BRANCH           
+            git checkout $CIRCLE_BRANCH
             git add manifests/$APP_NAME.yaml
             git add manifests/kustomization.yaml
             git commit -am "Bumps docker tag [skip ci]"
@@ -58,12 +59,6 @@ jobs:
 workflows:
   Deploy-App-on-Kubernetes:
     jobs:
-      - docker/publish:
-          image: $DOCKER_LOGIN/$APP_NAME
-          tag: $CIRCLE_SHA1,latest
-      - bump-docker-tag-kustomize:
-          requires:
-            - docker/publish
       - k8s-deploy:
           namespace: $NAMESPACE
           requires:
