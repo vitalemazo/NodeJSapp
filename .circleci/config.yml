@@ -1,3 +1,5 @@
+version: 2.1
+
 jobs:
   build:
     docker:
@@ -11,7 +13,12 @@ jobs:
           name: Build Docker Image
           command: |
             TAG=$(echo $CIRCLE_SHA1 | tr '[:upper:]' '[:lower:]')
-            echo "Docker image tag: $TAG"
             docker build -t $DOCKER_LOGIN/$APP_NAME:$TAG .
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
             docker push $DOCKER_LOGIN/$APP_NAME:$TAG
+
+workflows:
+  deploy:
+    jobs:
+      - build:
+          context: docker-context
